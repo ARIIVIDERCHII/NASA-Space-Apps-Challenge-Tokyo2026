@@ -7,13 +7,16 @@ window.PRESENTATION_DATA = {
       btnNotes: "Notes",
       btnOverview: "Grid",
       btnPrint: "PDF",
+      btnVoice: "Voice EN",
+      btnVoiceStop: "Mute EN",
+      btnAutoTour: "Auto",
       btnFullscreen: "Fullscreen",
       btnExitFullscreen: "Exit Fullscreen",
       btnPrev: "Prev",
       btnNext: "Next",
       notesHeading: "Speaker Script Cue (6-Min Keynote)",
       overviewTitle: "Slide Deck Overview — 11 Slides",
-      shortcutHint: "← → Navigate · N Notes · G Grid · L EN/日本語 · F Fullscreen"
+      shortcutHint: "← → Navigate · V Voice EN · A Auto · N Notes · G Grid · F Fullscreen"
     },
     ja: {
       docTitle: "NASA SEXTANT 3D & xEMU AR HUD — プレゼンテーション",
@@ -22,13 +25,16 @@ window.PRESENTATION_DATA = {
       btnNotes: "発表メモ",
       btnOverview: "一覧",
       btnPrint: "PDF出力",
+      btnVoice: "英語音声",
+      btnVoiceStop: "音声停止",
+      btnAutoTour: "自動",
       btnFullscreen: "全画面",
       btnExitFullscreen: "全画面解除",
       btnPrev: "前へ",
       btnNext: "次へ",
       notesHeading: "スピーカー台本メモ（6分間プレゼン）",
       overviewTitle: "スライド一覧 — 全11枚",
-      shortcutHint: "← → 移動 · N メモ · G 一覧 · L EN/日本語 · F 全画面"
+      shortcutHint: "← → 移動 · V 英語音声 · A 自動 · N メモ · G 一覧 · F 全画面"
     }
   },
 

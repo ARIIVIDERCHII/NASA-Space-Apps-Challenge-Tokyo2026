@@ -9,6 +9,11 @@
 
   let currentLang = detectInitialLang();
   let currentIndex = detectInitialSlide();
+  let isVoiceActive = false;
+  let isAutoTour = false;
+  let autoAdvanceTimer = null;
+  const voiceAudio = new Audio();
+  voiceAudio.preload = "auto";
 
   const el = {
     frame: document.getElementById("slide-frame"),
@@ -21,6 +26,8 @@
     btnNext: document.getElementById("btn-next"),
     btnLangEn: document.getElementById("btn-lang-en"),
     btnLangJa: document.getElementById("btn-lang-ja"),
+    btnVoice: document.getElementById("btn-voice"),
+    btnAutoTour: document.getElementById("btn-auto-tour"),
     btnNotes: document.getElementById("btn-notes"),
     btnCloseNotes: document.getElementById("btn-close-notes"),
     notesDrawer: document.getElementById("notes-drawer"),
@@ -93,10 +100,77 @@
     el.btnLangJa.setAttribute("aria-pressed", String(lang === "ja"));
 
     updateFullscreenLabel();
+    updateVoiceButtonUI();
     buildDots();
     renderSlide(false);
     renderOverviewGrid();
   }
+
+  function updateVoiceButtonUI() {
+    const ui = DATA.ui[currentLang];
+    if (el.btnVoice) {
+      el.btnVoice.classList.toggle("playing", isVoiceActive);
+      const label = el.btnVoice.querySelector("[data-ui]");
+      if (label) {
+        label.textContent = isVoiceActive ? ui.btnVoiceStop : ui.btnVoice;
+      }
+    }
+    if (el.btnAutoTour) {
+      el.btnAutoTour.classList.toggle("active", isAutoTour);
+      el.btnAutoTour.setAttribute("aria-pressed", String(isAutoTour));
+    }
+  }
+
+  function playCurrentSlideVoice() {
+    window.clearTimeout(autoAdvanceTimer);
+    const src = `audio/slide_${pad2(currentIndex + 1)}.mp3`;
+    if (voiceAudio.getAttribute("data-src") !== src) {
+      voiceAudio.src = src;
+      voiceAudio.setAttribute("data-src", src);
+    }
+    voiceAudio.currentTime = 0;
+    isVoiceActive = true;
+    updateVoiceButtonUI();
+    voiceAudio.play().catch(() => {
+      isVoiceActive = false;
+      updateVoiceButtonUI();
+    });
+  }
+
+  function stopVoice() {
+    window.clearTimeout(autoAdvanceTimer);
+    voiceAudio.pause();
+    voiceAudio.currentTime = 0;
+    isVoiceActive = false;
+    updateVoiceButtonUI();
+  }
+
+  function toggleVoice() {
+    if (isVoiceActive) {
+      stopVoice();
+    } else {
+      playCurrentSlideVoice();
+    }
+  }
+
+  function toggleAutoTour() {
+    isAutoTour = !isAutoTour;
+    updateVoiceButtonUI();
+    if (isAutoTour && !isVoiceActive) {
+      playCurrentSlideVoice();
+    }
+  }
+
+  voiceAudio.addEventListener("ended", () => {
+    if (isAutoTour && currentIndex < TOTAL_SLIDES - 1) {
+      autoAdvanceTimer = window.setTimeout(() => {
+        if (isAutoTour) goToSlide(currentIndex + 1, true);
+      }, 650);
+    } else {
+      isVoiceActive = false;
+      updateVoiceButtonUI();
+    }
+  });
 
   function goToSlide(index, animate = true) {
     const clamped = Math.max(0, Math.min(TOTAL_SLIDES - 1, index));
@@ -109,6 +183,9 @@
     }
     renderSlide(animate);
     updateOverviewHighlight();
+    if (isVoiceActive || isAutoTour) {
+      playCurrentSlideVoice();
+    }
   }
 
   function buildDots() {
@@ -934,6 +1011,9 @@
     el.btnLangEn.addEventListener("click", () => setLanguage("en"));
     el.btnLangJa.addEventListener("click", () => setLanguage("ja"));
 
+    if (el.btnVoice) el.btnVoice.addEventListener("click", toggleVoice);
+    if (el.btnAutoTour) el.btnAutoTour.addEventListener("click", toggleAutoTour);
+
     el.btnNotes.addEventListener("click", () => toggleNotes());
     el.btnCloseNotes.addEventListener("click", () => toggleNotes(false));
 
@@ -976,6 +1056,10 @@
         goToSlide(TOTAL_SLIDES - 1);
       } else if (key === "n" || key === "N") {
         toggleNotes();
+      } else if (key === "v" || key === "V") {
+        toggleVoice();
+      } else if (key === "a" || key === "A") {
+        toggleAutoTour();
       } else if (key === "g" || key === "G") {
         toggleOverview();
       } else if (key === "l" || key === "L") {
